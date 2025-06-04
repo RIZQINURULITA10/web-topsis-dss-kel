@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hasil Penilaian Kinerja Guru</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .gradient-bg {
+      background: linear-gradient(135deg, #ff6b6b 0%, #feca57 25%, #48cae4 50%, #ff9ff3 75%, #54a0ff 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 8s ease infinite;
+    }
+    
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .glass-effect {
+      backdrop-filter: blur(16px);
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+    
+    .glass-effect:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .floating-shapes {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    
+    .shape {
+      position: absolute;
+      opacity: 0.1;
+      animation: float 6s ease-in-out infinite;
+    }
+    
+    .shape:nth-child(1) {
+      top: 10%;
+      left: 20%;
+      animation-delay: 0s;
+    }
+    
+    .shape:nth-child(2) {
+      top: 20%;
+      right: 20%;
+      animation-delay: 2s;
+    }
+    
+    .shape:nth-child(3) {
+      bottom: 20%;
+      left: 15%;
+      animation-delay: 4s;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+    }
+    
+    .table-glass {
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .ranking-1 {
+      background: linear-gradient(135deg, #ffd700, #ffed4e) !important;
+      color: #1a1a1a !important;
+      font-weight: bold;
+      animation: goldGlow 2s ease-in-out infinite alternate;
+    }
+    
+    .ranking-2 {
+      background: linear-gradient(135deg, #c0c0c0, #e5e5e5) !important;
+      color: #1a1a1a !important;
+      font-weight: bold;
+    }
+    
+    .ranking-3 {
+      background: linear-gradient(135deg, #cd7f32, #daa520) !important;
+      color: #fff !important;
+      font-weight: bold;
+    }
+    
+    @keyframes goldGlow {
+      0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+      100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+    }
+    
+    .back-btn {
+      background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
+      background-size: 200% 200%;
+      animation: btnGradient 3s ease infinite;
+      transition: all 0.3s ease;
+    }
+    
+    .back-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+      animation-duration: 1s;
+    }
+    
+    @keyframes btnGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .floating-icon {
+      animation: floatIcon 3s ease-in-out infinite;
+    }
+    
+    @keyframes floatIcon {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .table-row:hover {
+      background: rgba(255, 255, 255, 0.2) !important;
+      transform: scale(1.02);
+      transition: all 0.3s ease;
+    }
+    
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    
+    .rank-1 {
+      background: linear-gradient(135deg, #ffd700, #ffed4e);
+      color: #1a1a1a;
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    }
+    
+    .rank-2 {
+      background: linear-gradient(135deg, #c0c0c0, #e5e5e5);
+      color: #1a1a1a;
+      box-shadow: 0 4px 15px rgba(192, 192, 192, 0.4);
+    }
+    
+    .rank-3 {
+      background: linear-gradient(135deg, #cd7f32, #daa520);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(205, 127, 50, 0.4);
+    }
+    
+    .rank-other {
+      background: linear-gradient(135deg, #6c757d, #95a5a6);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+    }
+  </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4 relative">
+  <!-- Floating Background Shapes -->
+  <div class="floating-shapes">
+    <div class="shape w-32 h-32 bg-white rounded-full"></div>
+    <div class="shape w-24 h-24 bg-white rounded-lg"></div>
+    <div class="shape w-20 h-20 bg-white rounded-full"></div>
+  </div>
+
+  <!-- Results Container -->
+  <div class="glass-effect rounded-2xl p-8 w-full max-w-4xl shadow-2xl relative z-10 transition-all duration-300">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="floating-icon mx-auto w-20 h-20 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center mb-4 shadow-lg">
+        <i class="fas fa-trophy text-3xl text-white"></i>
+      </div>
+      <h1 class="text-4xl font-bold text-white mb-2">Hasil Penilaian</h1>
+      <p class="text-white/80 text-lg">Ranking Kinerja Guru Berdasarkan Metode SAW</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div class="glass-effect rounded-xl p-4 text-center">
+        <div class="text-3xl font-bold text-yellow-300 mb-1">12</div>
+        <div class="text-white/80 text-sm">Total Guru</div>
+      </div>
+      <div class="glass-effect rounded-xl p-4 text-center">
+        <div class="text-3xl font-bold text-green-300 mb-1">5</div>
+        <div class="text-white/80 text-sm">Kriteria Penilaian</div>
+      </div>
+      <div class="glass-effect rounded-xl p-4 text-center">
+        <div class="text-3xl font-bold text-blue-300 mb-1">0.9876</div>
+        <div class="text-white/80 text-sm">Nilai Tertinggi</div>
+      </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="table-glass rounded-xl overflow-hidden mb-8">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-white/20">
+              <th class="px-6 py-4 text-left text-white font-semibold">
+                <i class="fas fa-user mr-2"></i>Alternatif
+              </th>
+              <th class="px-6 py-4 text-center text-white font-semibold">
+                <i class="fas fa-star mr-2"></i>Nilai Preferensi
+              </th>
+              <th class="px-6 py-4 text-center text-white font-semibold">
+                <i class="fas fa-medal mr-2"></i>Ranking
+              </th>
+              <th class="px-6 py-4 text-center text-white font-semibold">
+                <i class="fas fa-chart-line mr-2"></i>Status
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Sample data - replace with actual template variables -->
+            <tr class="table-row ranking-1 border-b border-white/10">
+              <td class="px-6 py-4">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-user text-white"></i>
+                  </div>
+                  <div>
+                    <div class="font-semibold text-gray-900">A2-Naning S.</div>
+                    <div class="text-sm text-gray-600">ID: A1</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="text-lg font-bold text-gray-900">0.6476</div>
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                  <div class="bg-gradient-to-r from-yellow-400 to-orange-400 h-2 rounded-full" style="width: 98.76%"></div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="rank-badge rank-1">
+                  <i class="fas fa-crown"></i>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                  <i class="fas fa-check mr-1"></i>Terbaik
+                </span>
+              </td>
+            </tr>
+            
+            <tr class="table-row ranking-2 border-b border-white/10">
+              <td class="px-6 py-4">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-user text-white"></i>
+                  </div>
+                  <div>
+                    <div class="font-semibold text-gray-900">A5-Yuni F.</div>
+                    <div class="text-sm text-gray-600">ID: A2</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="text-lg font-bold text-gray-900">0.5321</div>
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                  <div class="bg-gradient-to-r from-gray-400 to-gray-500 h-2 rounded-full" style="width: 85.43%"></div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="rank-badge rank-2">2</div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                  <i class="fas fa-thumbs-up mr-1"></i>Baik
+                </span>
+              </td>
+            </tr>
+            
+            <tr class="table-row ranking-3 border-b border-white/10">
+              <td class="px-6 py-4">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 bg-gradient-to-r from-orange-600 to-yellow-600 rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-user text-white"></i>
+                  </div>
+                  <div>
+                    <div class="font-semibold text-white">A1-Dodi M.D.</div>
+                    <div class="text-sm text-white/70">ID: A3</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="text-lg font-bold text-white">0.4529</div>
+                <div class="w-full bg-white/20 rounded-full h-2 mt-1">
+                  <div class="bg-gradient-to-r from-orange-600 to-yellow-600 h-2 rounded-full" style="width: 72.34%"></div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="rank-badge rank-3">3</div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span class="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                  <i class="fas fa-star mr-1"></i>Cukup
+                </span>
+              </td>
+            </tr>
+            
+            <!-- Additional rows for demonstration -->
+            <tr class="table-row border-b border-white/10 hover:bg-white/10">
+              <td class="px-6 py-4">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 bg-gradient-to-r from-gray-500 to-gray-600 rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-user text-white"></i>
+                  </div>
+                  <div>
+                    <div class="font-semibold text-white">A3-Sugito.</div>
+                    <div class="text-sm text-white/70">ID: A4</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="text-lg font-bold text-white">0.4421</div>
+                <div class="w-full bg-white/20 rounded-full h-2 mt-1">
+                  <div class="bg-gradient-to-r from-gray-500 to-gray-600 h-2 rounded-full" style="width: 67.89%"></div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="rank-badge rank-other">4</div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span class="bg-gray-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                  <i class="fas fa-minus mr-1"></i>Standar
+                </span>
+              </td>
+            </tr>
+
+            <tr class="table-row border-b border-white/10 hover:bg-white/10">
+              <td class="px-6 py-4">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 bg-gradient-to-r from-gray-500 to-gray-600 rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-user text-white"></i>
+                  </div>
+                  <div>
+                    <div class="font-semibold text-white">A4-Yukhanidz Z.</div>
+                    <div class="text-sm text-white/70">ID: A4</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="text-lg font-bold text-white">0.4267</div>
+                <div class="w-full bg-white/20 rounded-full h-2 mt-1">
+                  <div class="bg-gradient-to-r from-gray-500 to-gray-600 h-2 rounded-full" style="width: 67.89%"></div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="rank-badge rank-other">5</div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span class="bg-gray-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                  <i class="fas fa-minus mr-1"></i>Standar
+                </span>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row justify-center gap-4 mb-6">
+      <a href="{{ url_for('home') }}" class="back-btn px-8 py-4 text-white font-bold rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300/50 relative overflow-hidden transition-all duration-300">
+  <span class="relative z-10">
+    <i class="fas fa-arrow-left mr-2"></i>
+    Kembali ke Dashboard
+  </span>
+  <div class="absolute inset-0 bg-white opacity-0 hover:opacity-10 transition-opacity duration-300"></div>
+</a>
+      
+      <button class="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 px-8 py-4 text-white font-bold rounded-xl focus:outline-none focus:ring-4 focus:ring-green-300/50 transition-all duration-300 hover:transform hover:-translate-y-1">
+        <i class="fas fa-download mr-2"></i>
+        Export PDF
+      </button>
+      
+      <button class="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 px-8 py-4 text-white font-bold rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-300/50 transition-all duration-300 hover:transform hover:-translate-y-1">
+        <i class="fas fa-share mr-2"></i>
+        Bagikan Hasil
+      </button>
+    </div>
+<a href="{{ url_for('upload') }}" class="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 px-8 py-4 text-white font-bold rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300/50 transition-all duration-300 hover:transform hover:-translate-y-1">
+  <i class="fas fa-upload mr-2"></i>
+  Ke Upload
+</a>
+
+
+  <script>
+    // Add interactive features
+    document.addEventListener('DOMContentLoaded', function() {
+      // Animate progress bars
+      const progressBars = document.querySelectorAll('.bg-gradient-to-r');
+      progressBars.forEach((bar, index) => {
+        setTimeout(() => {
+          bar.style.width = bar.style.width;
+          bar.style.transition = 'width 1s ease-in-out';
+        }, index * 200);
+      });
+
+      // Add click events to action buttons
+      document.querySelector('.back-btn').addEventListener('click', function() {
+        window.history.back();
+      });
+
+      // Simulate export functionality
+      document.querySelectorAll('button').forEach(btn => {
+        if (btn.textContent.includes('Export PDF')) {
+          btn.addEventListener('click', function() {
+            alert('Fitur export PDF akan segera tersedia!');
+          });
+        }
+        if (btn.textContent.includes('Bagikan')) {
+          btn.addEventListener('click', function() {
+            if (navigator.share) {
+              navigator.share({
+                title: 'Hasil Penilaian Kinerja Guru',
+                text: 'Lihat hasil ranking penilaian kinerja guru',
+                url: window.location.href
+              });
+            } else {
+              alert('Link berhasil disalin ke clipboard!');
+            }
+          });
+        }
+      });
+
+      // Add ripple effect to table rows
+      document.querySelectorAll('.table-row').forEach(row => {
+        row.addEventListener('click', function(e) {
+          const ripple = document.createElement('span');
+          const rect = this.getBoundingClientRect();
+          const size = Math.max(rect.width, rect.height);
+          const x = e.clientX - rect.left - size / 2;
+          const y = e.clientY - rect.top - size / 2;
+          
+          ripple.style.width = ripple.style.height = size + 'px';
+          ripple.style.left = x + 'px';
+          ripple.style.top = y + 'px';
+          ripple.classList.add('absolute', 'bg-white', 'opacity-20', 'rounded-full', 'animate-ping', 'pointer-events-none');
+          
+          this.style.position = 'relative';
+          this.appendChild(ripple);
+          
+          setTimeout(() => {
+            ripple.remove();
+          }, 600);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

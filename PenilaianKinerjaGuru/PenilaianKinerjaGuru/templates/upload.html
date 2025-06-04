@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Data Excel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .gradient-bg {
+      background: linear-gradient(135deg, #ff6b6b 0%, #feca57 25%, #48cae4 50%, #ff9ff3 75%, #54a0ff 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 8s ease infinite;
+    }
+    
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .glass-effect {
+      backdrop-filter: blur(16px);
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+    
+    .glass-effect:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .file-input-wrapper:hover {
+      transform: scale(1.02);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .file-input {
+      position: absolute;
+      left: -9999px;
+    }
+    
+    .upload-btn {
+      background: linear-gradient(45deg, #56ab2f, #a8e6cf, #56ab2f);
+      background-size: 200% 200%;
+      animation: btnGradient 3s ease infinite;
+      transition: all 0.3s ease;
+    }
+    
+    .upload-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(86, 171, 47, 0.4);
+      animation-duration: 1s;
+    }
+    
+    @keyframes btnGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .drag-drop-area {
+      border: 2px dashed rgba(255, 255, 255, 0.5);
+      transition: all 0.3s ease;
+    }
+    
+    .drag-drop-area.dragover {
+      border-color: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.02);
+    }
+    
+    .progress-bar {
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    
+    .floating-icon {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+  </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+  <!-- Upload Container -->
+  <div class="glass-effect rounded-2xl p-8 w-full max-w-2xl transition-all duration-300">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="floating-icon mx-auto w-20 h-20 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center mb-4 shadow-lg">
+        <i class="fas fa-file-excel text-3xl text-white"></i>
+      </div>
+      <h1 class="text-4xl font-bold text-white mb-2">Upload Data Excel</h1>
+      <p class="text-white/80">Pilih file Excel (.xlsx, .xls) untuk diupload</p>
+    </div>
+
+    <!-- Upload Form -->
+    <form method="post" enctype="multipart/form-data" id="uploadForm">
+      <!-- Drag & Drop Area -->
+      <div class="drag-drop-area rounded-xl p-8 mb-6 text-center" id="dropArea">
+        <div class="mb-4">
+          <i class="fas fa-cloud-upload-alt text-6xl text-white/60 mb-4"></i>
+          <p class="text-xl text-white mb-2">Drag & Drop file Excel di sini</p>
+          <p class="text-white/70 mb-4">atau</p>
+        </div>
+        
+        <!-- File Input Button -->
+        <div class="file-input-wrapper inline-block bg-white/20 hover:bg-white/30 px-6 py-3 rounded-xl border border-white/40">
+          <input 
+            class="file-input" 
+            type="file" 
+            name="file" 
+            id="fileInput"
+            accept=".xlsx,.xls"
+            required
+          >
+          <label for="fileInput" class="cursor-pointer text-white font-medium">
+            <i class="fas fa-folder-open mr-2"></i>
+            Pilih File Excel
+          </label>
+        </div>
+      </div>
+
+      <!-- Selected File Info -->
+      <div id="fileInfo" class="hidden bg-white/10 rounded-xl p-4 mb-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <i class="fas fa-file-excel text-green-400 text-2xl mr-3"></i>
+            <div>
+              <p class="text-white font-medium" id="fileName"></p>
+              <p class="text-white/70 text-sm" id="fileSize"></p>
+            </div>
+          </div>
+          <button type="button" onclick="removeFile()" class="text-red-400 hover:text-red-300">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div id="progressContainer" class="hidden mb-6">
+        <div class="bg-white/20 rounded-full h-3 mb-2">
+          <div class="progress-bar bg-gradient-to-r from-green-400 to-blue-500 h-3 rounded-full" id="progressBar"></div>
+        </div>
+        <p class="text-white/80 text-sm text-center" id="progressText">Uploading...</p>
+      </div>
+
+      <!-- Upload Button -->
+      <button 
+        class="upload-btn w-full py-4 px-6 text-white font-bold rounded-xl focus:outline-none focus:ring-4 focus:ring-green-300/50 disabled:opacity-50 disabled:cursor-not-allowed"
+        type="submit"
+        id="uploadBtn"
+        disabled
+      >
+        <i class="fas fa-upload mr-2"></i>
+        Upload Data Excel
+      </button>
+    </form>
+
+    <!-- Upload Instructions -->
+    <div class="mt-8 bg-white/10 rounded-xl p-4">
+      <h3 class="text-white font-semibold mb-2">
+        <i class="fas fa-info-circle mr-2"></i>
+        Petunjuk Upload:
+      </h3>
+      <ul class="text-white/80 text-sm space-y-1">
+        <li>• Format file yang didukung: .xlsx, .xls</li>
+        <li>• Ukuran maksimal: 10 MB</li>
+        <li>• Pastikan data terstruktur dengan baik</li>
+        <li>• File akan diproses setelah upload selesai</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const dropArea = document.getElementById('dropArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const uploadForm = document.getElementById('uploadForm');
+
+    // Drag and drop functionality
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+      dropArea.classList.add('dragover');
+    }
+
+    function unhighlight(e) {
+      dropArea.classList.remove('dragover');
+    }
+
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      handleFiles(files);
+    }
+
+    fileInput.addEventListener('change', function(e) {
+      handleFiles(e.target.files);
+    });
+
+    function handleFiles(files) {
+      if (files.length > 0) {
+        const file = files[0];
+        
+        // Validate file type
+        if (!file.name.match(/\.(xlsx|xls)$/)) {
+          alert('Harap pilih file Excel (.xlsx atau .xls)');
+          return;
+        }
+
+        // Validate file size (10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          alert('Ukuran file terlalu besar. Maksimal 10MB.');
+          return;
+        }
+
+        displayFileInfo(file);
+        uploadBtn.disabled = false;
+      }
+    }
+
+    function displayFileInfo(file) {
+      fileName.textContent = file.name;
+      fileSize.textContent = formatFileSize(file.size);
+      fileInfo.classList.remove('hidden');
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function removeFile() {
+      fileInput.value = '';
+      fileInfo.classList.add('hidden');
+      uploadBtn.disabled = true;
+    }
+
+    // Form submission with progress simulation
+    uploadForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      if (!fileInput.files.length) {
+        alert('Harap pilih file terlebih dahulu');
+        return;
+      }
+
+      startUpload();
+    });
+
+    function startUpload() {
+      uploadBtn.disabled = true;
+      uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Uploading...';
+      progressContainer.classList.remove('hidden');
+      
+      // Simulate upload progress
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress > 100) progress = 100;
+        
+        progressBar.style.width = progress + '%';
+        progressText.textContent = `Uploading... ${Math.round(progress)}%`;
+        
+        if (progress >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            progressText.textContent = 'Upload berhasil!';
+            uploadBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Upload Berhasil';
+            uploadBtn.classList.add('bg-green-600');
+            
+            setTimeout(() => {
+              alert('File berhasil diupload dan sedang diproses!');
+              resetForm();
+            }, 1500);
+          }, 500);
+        }
+      }, 200);
+    }
+
+    function resetForm() {
+      uploadForm.reset();
+      fileInfo.classList.add('hidden');
+      progressContainer.classList.add('hidden');
+      progressBar.style.width = '0%';
+      uploadBtn.disabled = true;
+      uploadBtn.innerHTML = '<i class="fas fa-upload mr-2"></i>Upload Data Excel';
+      uploadBtn.classList.remove('bg-green-600');
+    }
+  </script>
+</body>
+</html>
